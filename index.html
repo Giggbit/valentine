@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Вопросик 💘</title>
+  <style>
+    :root{
+      --bg1:#ffd6e7;
+      --bg2:#f7c6ff;
+      --card:#ffffffcc;
+      --text:#1a1a1a;
+      --yes:#ff3b7a;
+      --shadow: 0 18px 60px rgba(0,0,0,.15);
+      --radius: 22px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      background: radial-gradient(1200px 600px at 30% 10%, var(--bg2), transparent),
+                  linear-gradient(135deg, var(--bg1), #ffe9f2);
+      overflow:hidden;
+      color:var(--text);
+    }
+    .card{
+      width:min(560px, 92vw);
+      background:var(--card);
+      backdrop-filter: blur(8px);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:28px 24px;
+      text-align:center;
+      position:relative;
+    }
+    .emoji{
+      font-size:64px;
+      line-height:1;
+      margin: 6px 0 12px;
+      user-select:none;
+    }
+    h1{
+      font-size: clamp(22px, 4.8vw, 34px);
+      margin: 8px 0 8px;
+      font-weight: 800;
+    }
+    p{
+      margin: 6px 0 18px;
+      opacity:.85;
+    }
+    .btns{
+      display:flex;
+      justify-content:center;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-top:10px;
+      position:relative;
+    }
+    button{
+      border:0;
+      padding:12px 22px;
+      border-radius: 999px;
+      font-weight:700;
+      font-size:16px;
+      cursor:pointer;
+      box-shadow: 0 10px 24px rgba(0,0,0,.12);
+      transition: transform .08s ease;
+      position:relative;
+    }
+    button:active{ transform: scale(.98); }
+    .yes{ background: var(--yes); color:white; }
+    .no{ background: #ffffff; color:#111; }
+
+    .hint{
+      margin-top:14px;
+      font-size: 13px;
+      opacity:.65;
+      min-height: 18px;
+    }
+
+    /* Экраны */
+    .screen{ display:none; }
+    .screen.active{ display:block; }
+
+    /* Сердечки */
+    .heart{
+      position:fixed;
+      left:0; top:-20px;
+      font-size: 18px;
+      pointer-events:none;
+      animation: fall linear forwards;
+      opacity:.9;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,.15));
+    }
+    @keyframes fall{
+      to{
+        transform: translate(var(--dx), 110vh) rotate(var(--rot));
+        opacity:0.9;
+      }
+    }
+
+    /* Для убегающей кнопки — нужна область */
+    .no-wrap{
+      position:relative;
+      height: 64px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
+    /* на втором экране пусть "No" может становиться absolute */
+    .no.movable{ position:absolute; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <!-- SCREEN 1 -->
+    <div id="screen1" class="screen active">
+      <div class="emoji">🕵️‍♂️</div>
+      <h1>Вас зовут <span id="name1">Мариам</span>?</h1>
+      <p>Проверим, что вы точно та самая 😉</p>
+      <div class="btns">
+        <button class="yes" id="s1Yes">Да</button>
+        <button class="no" id="s1No">Нет</button>
+      </div>
+      <div class="hint" id="s1Hint"></div>
+    </div>
+
+    <!-- SCREEN 2 -->
+    <div id="screen2" class="screen">
+      <div class="emoji">🐱💘</div>
+      <h1><span id="name2">Марьяш</span>, будешь моей валентинкой?</h1>
+      <p>Выбирай правильно 😈</p>
+
+      <div class="btns">
+        <button class="yes" id="yesBtn">Yes</button>
+        <div class="no-wrap" id="noArea">
+          <button class="no movable" id="noBtn">No</button>
+        </div>
+      </div>
+
+      <div class="hint" id="hint">"No" выглядит слишком застенчиво 😼</div>
+    </div>
+
+    <!-- SCREEN 3 (после Yes) -->
+    <div id="screen3" class="screen">
+      <div class="emoji">🎉💖</div>
+      <h1>Урааа! 💘</h1>
+      <p>Ты официально моя валентинка 🥰</p>
+      <p style="font-weight:700;">14.02 — готовься, будет сюрприз 😉</p>
+    </div>
+  </div>
+
+<script>
+  // ====== НАСТРОЙКИ ======
+  const GIRL_NAME = "Марьяша"; // <-- поменяй здесь имя
+
+  // вставим имя в оба экрана
+  document.getElementById("name1").textContent = GIRL_NAME;
+  document.getElementById("name2").textContent = GIRL_NAME;
+
+  const screen1 = document.getElementById("screen1");
+  const screen2 = document.getElementById("screen2");
+  const screen3 = document.getElementById("screen3");
+
+  const s1Yes = document.getElementById("s1Yes");
+  const s1No  = document.getElementById("s1No");
+  const s1Hint = document.getElementById("s1Hint");
+
+  const yesBtn = document.getElementById("yesBtn");
+  const noBtn = document.getElementById("noBtn");
+  const noArea = document.getElementById("noArea");
+  const hint = document.getElementById("hint");
+
+  function show(el){
+    [screen1, screen2, screen3].forEach(s => s.classList.remove("active"));
+    el.classList.add("active");
+  }
+
+  // Screen 1 logic
+  s1Yes.addEventListener("click", () => {
+    show(screen2);
+    startHearts(18);
+  });
+
+  s1No.addEventListener("click", () => {
+    s1Hint.textContent = "Кажется, вы не " + GIRL_NAME + " 😅 Попробуйте ещё раз.";
+    startHearts(6);
+  });
+
+  // Screen 2 logic
+  yesBtn.addEventListener("click", () => {
+    show(screen3);
+    startHearts(80); // много сердечек!
+  });
+
+  // убегающая кнопка "No"
+  function moveNoButton(){
+    const areaRect = noArea.getBoundingClientRect();
+    const btnRect = noBtn.getBoundingClientRect();
+
+    const maxX = areaRect.width - btnRect.width;
+    const maxY = areaRect.height - btnRect.height;
+
+    const x = Math.max(0, Math.random() * maxX);
+    const y = Math.max(0, Math.random() * maxY);
+
+    noBtn.style.left = x + "px";
+    noBtn.style.top  = y + "px";
+  }
+
+  noBtn.addEventListener("mouseenter", () => {
+    hint.textContent = "Ой-ой 😼";
+    moveNoButton();
+  });
+  noBtn.addEventListener("click", () => {
+    hint.textContent = "Не-а, не получится 😈";
+    moveNoButton();
+    startHearts(10);
+  });
+
+  // ===== Сердечки =====
+  function spawnHeart(){
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.textContent = Math.random() < 0.5 ? "💗" : "💖";
+
+    const left = Math.random() * 100;
+    const dx = (Math.random() * 60 - 30) + "px";
+    const rot = (Math.random() * 220 - 110) + "deg";
+    const duration = (Math.random() * 1.8 + 2.2).toFixed(2) + "s";
+    const size = (Math.random() * 14 + 14).toFixed(0) + "px";
+
+    heart.style.left = left + "vw";
+    heart.style.setProperty("--dx", dx);
+    heart.style.setProperty("--rot", rot);
+    heart.style.animationDuration = duration;
+    heart.style.fontSize = size;
+
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), 4500);
+  }
+
+  function startHearts(count){
+    for(let i=0;i<count;i++){
+      setTimeout(spawnHeart, i * 35);
+    }
+  }
+
+  startHearts(8);
+</script>
+</body>
+</html>
