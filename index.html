@@ -113,7 +113,8 @@
     /* на втором экране пусть "No" может становиться absolute */
     .no.movable{
       position: fixed;
-      z-index: 9999;              
+      z-index: 9999;
+      will-change: left, top;
       transition: left 0.15s ease, top 0.15s ease;
     }
   </style>
@@ -206,18 +207,26 @@
   function moveNoButton(){
     const padding = 12;
   
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
+    const vp = window.visualViewport || {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      offsetLeft: 0,
+      offsetTop: 0
+    };
+  
     const btnRect = noBtn.getBoundingClientRect();
   
-    const maxX = vw - btnRect.width - padding;
-    const maxY = vh - btnRect.height - padding;
+    const minX = vp.offsetLeft + padding;
+    const minY = vp.offsetTop + padding;
   
-    const x = padding + Math.random() * Math.max(0, maxX);
-    const y = padding + Math.random() * Math.max(0, maxY);
+    const maxX = vp.offsetLeft + vp.width - btnRect.width - padding;
+    const maxY = vp.offsetTop + vp.height - btnRect.height - padding;
   
-    noBtn.style.left = x + "px";
-    noBtn.style.top  = y + "px";
+    const x = minX + Math.random() * Math.max(0, maxX - minX);
+    const y = minY + Math.random() * Math.max(0, maxY - minY);
+  
+    noBtn.style.left = `${x}px`;
+    noBtn.style.top  = `${y}px`;
   }
 
   noBtn.addEventListener("mouseenter", () => {
