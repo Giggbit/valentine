@@ -103,14 +103,18 @@
 
     /* Для убегающей кнопки — нужна область */
     .no-wrap{
-      position:relative;
-      height: 64px;
-      display:flex;
-      justify-content:center;
-      align-items:center;
+      position: relative;
+      width: 100%;
+      height: 140px;   /* ⬅ больше пространства */
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     /* на втором экране пусть "No" может становиться absolute */
-    .no.movable{ position:absolute; }
+    .no.movable{
+      position: absolute;
+      transition: left 0.15s ease, top 0.15s ease;
+    }
   </style>
 </head>
 <body>
@@ -155,7 +159,7 @@
 
 <script>
   // ====== НАСТРОЙКИ ======
-  const GIRL_NAME = "Марьяша"; // <-- поменяй здесь имя
+  const GIRL_NAME = "Марьяша";
 
   // вставим имя в оба экрана
   document.getElementById("name1").textContent = GIRL_NAME;
@@ -200,13 +204,15 @@
   function moveNoButton(){
     const areaRect = noArea.getBoundingClientRect();
     const btnRect = noBtn.getBoundingClientRect();
-
-    const maxX = areaRect.width - btnRect.width;
-    const maxY = areaRect.height - btnRect.height;
-
-    const x = Math.max(0, Math.random() * maxX);
-    const y = Math.max(0, Math.random() * maxY);
-
+  
+    const padding = 10;
+  
+    const maxX = areaRect.width - btnRect.width - padding;
+    const maxY = areaRect.height - btnRect.height - padding;
+  
+    const x = Math.random() * maxX;
+    const y = Math.random() * maxY;
+  
     noBtn.style.left = x + "px";
     noBtn.style.top  = y + "px";
   }
