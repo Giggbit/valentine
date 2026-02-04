@@ -112,7 +112,8 @@
     }
     /* на втором экране пусть "No" может становиться absolute */
     .no.movable{
-      position: absolute;
+      position: fixed;
+      z-index: 9999;              
       transition: left 0.15s ease, top 0.15s ease;
     }
   </style>
@@ -186,6 +187,7 @@
   // Screen 1 logic
   s1Yes.addEventListener("click", () => {
     show(screen2);
+    moveNoButton();
     startHearts(18);
   });
 
@@ -202,16 +204,17 @@
 
   // убегающая кнопка "No"
   function moveNoButton(){
-    const areaRect = noArea.getBoundingClientRect();
+    const padding = 12;
+  
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
     const btnRect = noBtn.getBoundingClientRect();
   
-    const padding = 10;
+    const maxX = vw - btnRect.width - padding;
+    const maxY = vh - btnRect.height - padding;
   
-    const maxX = areaRect.width - btnRect.width - padding;
-    const maxY = areaRect.height - btnRect.height - padding;
-  
-    const x = Math.random() * maxX;
-    const y = Math.random() * maxY;
+    const x = padding + Math.random() * Math.max(0, maxX);
+    const y = padding + Math.random() * Math.max(0, maxY);
   
     noBtn.style.left = x + "px";
     noBtn.style.top  = y + "px";
@@ -225,6 +228,17 @@
     hint.textContent = "Не-а, не получится 😈";
     moveNoButton();
     startHearts(10);
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    const r = noBtn.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
+  
+    if (screen2.classList.contains("active") && dist < 120) {
+      moveNoButton();
+    }
   });
 
   // ===== Сердечки =====
