@@ -188,7 +188,11 @@
   // Screen 1 logic
   s1Yes.addEventListener("click", () => {
     show(screen2);
-    moveNoButton();
+  
+    requestAnimationFrame(() => {
+      placeNoUnderYes();
+    });
+  
     startHearts(18);
   });
 
@@ -203,6 +207,36 @@
     startHearts(80); // много сердечек!
   });
 
+  function placeNoUnderYes(){
+    const padding = 12;
+  
+    const vp = window.visualViewport || {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      offsetLeft: 0,
+      offsetTop: 0
+    };
+  
+    const yesRect = yesBtn.getBoundingClientRect();
+    const noRect = noBtn.getBoundingClientRect();
+  
+    // хотим центрировать No под Yes
+    let x = yesRect.left + (yesRect.width - noRect.width) / 2;
+    let y = yesRect.bottom + 12; // отступ под кнопкой Yes
+  
+    // clamp внутри экрана (visual viewport)
+    const minX = vp.offsetLeft + padding;
+    const minY = vp.offsetTop + padding;
+    const maxX = vp.offsetLeft + vp.width - noRect.width - padding;
+    const maxY = vp.offsetTop + vp.height - noRect.height - padding;
+  
+    x = Math.min(Math.max(x, minX), maxX);
+    y = Math.min(Math.max(y, minY), maxY);
+  
+    noBtn.style.left = `${x}px`;
+    noBtn.style.top  = `${y}px`;
+  }
+  
   // убегающая кнопка "No"
   function moveNoButton(){
     const padding = 12;
@@ -214,16 +248,22 @@
       offsetTop: 0
     };
   
-    const btnRect = noBtn.getBoundingClientRect();
+    const rect = noBtn.getBoundingClientRect();
   
     const minX = vp.offsetLeft + padding;
     const minY = vp.offsetTop + padding;
+    const maxX = vp.offsetLeft + vp.width - rect.width - padding;
+    const maxY = vp.offsetTop + vp.height - rect.height - padding;
   
-    const maxX = vp.offsetLeft + vp.width - btnRect.width - padding;
-    const maxY = vp.offsetTop + vp.height - btnRect.height - padding;
+    // если вдруг viewport слишком маленький — просто держим в min
+    if (maxX <= minX || maxY <= minY) {
+      noBtn.style.left = `${minX}px`;
+      noBtn.style.top  = `${minY}px`;
+      return;
+    }
   
-    const x = minX + Math.random() * Math.max(0, maxX - minX);
-    const y = minY + Math.random() * Math.max(0, maxY - minY);
+    const x = minX + Math.random() * (maxX - minX);
+    const y = minY + Math.random() * (maxY - minY);
   
     noBtn.style.left = `${x}px`;
     noBtn.style.top  = `${y}px`;
@@ -235,6 +275,7 @@
   });
   noBtn.addEventListener("click", () => {
     hint.textContent = "Не-а, не получится 😈";
+    moveNoButton(); 
     startHearts(10);
   });
 
