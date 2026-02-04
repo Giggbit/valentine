@@ -226,19 +226,7 @@
   });
   noBtn.addEventListener("click", () => {
     hint.textContent = "Не-а, не получится 😈";
-    moveNoButton();
     startHearts(10);
-  });
-
-  document.addEventListener("mousemove", (e) => {
-    const r = noBtn.getBoundingClientRect();
-    const cx = r.left + r.width / 2;
-    const cy = r.top + r.height / 2;
-    const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
-  
-    if (screen2.classList.contains("active") && dist < 120) {
-      moveNoButton();
-    }
   });
 
   // ===== Сердечки =====
